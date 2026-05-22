@@ -4,86 +4,86 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="สแกนขาย"/>
 <meta name="theme-color" content="#0a0a0f"/>
 <title>สแกนขาย</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js"></script>
+<!-- html5-qrcode: เสถียรกว่า ZXing บนมือถือ Android/iOS -->
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Kanit,sans-serif;overscroll-behavior:none;}
-.app{max-width:430px;margin:0 auto;background:#0a0a0f;height:100vh;color:#fff;display:flex;flex-direction:column;position:relative;}
-.status-bar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px 4px;font-size:12px;color:rgba(255,255,255,0.45);flex-shrink:0;}
+html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overscroll-behavior:none;}
+.app{max-width:430px;margin:0 auto;background:#0a0a0f;height:100vh;color:#fff;display:flex;flex-direction:column;}
+.sb{display:flex;justify-content:space-between;padding:14px 20px 4px;font-size:12px;color:rgba(255,255,255,.45);flex-shrink:0;}
 .screen{display:none;flex-direction:column;flex:1;overflow:hidden;}
 .screen.active{display:flex;}
-
-/* HEADER */
-.header{padding:6px 20px 12px;flex-shrink:0;}
-.header h1{font-size:21px;font-weight:700;letter-spacing:-0.3px;}
-.header p{font-size:12px;color:rgba(255,255,255,0.38);margin-top:2px;}
+.hdr{padding:6px 20px 10px;flex-shrink:0;}
+.hdr h1{font-size:21px;font-weight:700;}
+.hdr p{font-size:12px;color:rgba(255,255,255,.38);margin-top:2px;}
 
 /* SCANNER */
-.scanner-wrap{margin:0 16px;border-radius:20px;overflow:hidden;position:relative;flex-shrink:0;background:#000;}
-.scanner-wrap video{width:100%;display:block;aspect-ratio:4/3;object-fit:cover;}
-.scanner-overlay{position:absolute;inset:0;pointer-events:none;}
+.scan-wrap{margin:0 16px;border-radius:18px;overflow:hidden;position:relative;flex-shrink:0;background:#111;}
+#qr-reader{width:100%;}
+#qr-reader video{border-radius:18px;}
+/* ซ่อน UI ของ html5-qrcode ที่ไม่ต้องการ */
+#qr-reader__scan_region{border:none!important;}
+#qr-reader__dashboard{display:none!important;}
+#qr-reader__status_span{display:none!important;}
+#qr-reader img{display:none!important;}
+.scan-overlay{position:absolute;inset:0;pointer-events:none;}
 .corner{position:absolute;width:26px;height:26px;}
 .corner.tl{top:16px;left:16px;border-top:2.5px solid #7c5cfc;border-left:2.5px solid #7c5cfc;border-radius:5px 0 0 0;}
 .corner.tr{top:16px;right:16px;border-top:2.5px solid #7c5cfc;border-right:2.5px solid #7c5cfc;border-radius:0 5px 0 0;}
 .corner.bl{bottom:16px;left:16px;border-bottom:2.5px solid #7c5cfc;border-left:2.5px solid #7c5cfc;border-radius:0 0 0 5px;}
 .corner.br{bottom:16px;right:16px;border-bottom:2.5px solid #7c5cfc;border-right:2.5px solid #7c5cfc;border-radius:0 0 5px 0;}
-.scan-line{position:absolute;left:20px;right:20px;height:2px;background:linear-gradient(90deg,transparent,#7c5cfc,#c4b5fd,#7c5cfc,transparent);animation:scanMove 2s ease-in-out infinite;border-radius:2px;}
+.scan-line{position:absolute;left:20px;right:20px;height:2px;background:linear-gradient(90deg,transparent,#7c5cfc,#c4b5fd,#7c5cfc,transparent);animation:scanMove 2s ease-in-out infinite;}
 @keyframes scanMove{0%,100%{top:20px;opacity:.3;}50%{top:calc(100% - 20px);opacity:1;}}
-.scan-label{position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.3px;}
-.cam-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#0d0d15;}
-.cam-ph span{font-size:12px;color:rgba(255,255,255,.35);}
-.btn-cam{background:#7c5cfc;border:none;border-radius:10px;padding:10px 20px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;}
-.flash{position:absolute;inset:0;background:rgba(124,92,252,.35);opacity:0;pointer-events:none;transition:opacity .12s;border-radius:20px;}
+.scan-lbl{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:11px;color:rgba(255,255,255,.5);}
+.cam-ph{padding:32px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;background:#111;border-radius:18px;margin:0 16px;}
+.cam-ph span{font-size:12px;color:rgba(255,255,255,.35);text-align:center;}
+.btn-cam{background:#7c5cfc;border:none;border-radius:10px;padding:11px 22px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;}
+.flash{position:absolute;inset:0;background:rgba(124,92,252,.4);opacity:0;pointer-events:none;border-radius:18px;transition:opacity .12s;}
 .flash.on{opacity:1;}
+.scan-status{text-align:center;font-size:12px;color:#a78bfa;padding:6px 16px;flex-shrink:0;min-height:24px;}
 
 /* INPUTS */
-.row-inp{display:flex;gap:8px;margin:10px 16px;}
+.row-inp{display:flex;gap:8px;margin:6px 16px;}
 .row-inp input{flex:1;background:#161622;border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:11px 14px;color:#fff;font-size:15px;outline:none;font-family:inherit;}
 .row-inp input::placeholder{color:rgba(255,255,255,.22);}
 .row-inp input:focus{border-color:#7c5cfc;}
 .btn-add{background:#7c5cfc;border:none;border-radius:12px;padding:11px 18px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;}
-.btn-add:active{opacity:.8;}
 
-/* DIVIDER */
-.or-div{display:flex;align-items:center;gap:10px;margin:8px 16px;}
+.or-div{display:flex;align-items:center;gap:10px;margin:6px 16px;}
 .or-div::before,.or-div::after{content:'';flex:1;height:.5px;background:rgba(255,255,255,.07);}
 .or-div span{font-size:11px;color:rgba(255,255,255,.22);}
 
 /* LIST */
-.list-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px 4px;}
+.list-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 16px 4px;}
 .sec-lbl{font-size:10px;color:rgba(255,255,255,.3);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 .card{background:#111119;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:11px;}
 .card:active{background:#1a1a28;}
-.icon-box{width:40px;height:40px;background:#1c1c2a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.ico{width:40px;height:40px;background:#1c1c2a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
 .inf{flex:1;min-width:0;}
-.inf .name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.inf .code{font-size:11px;color:rgba(255,255,255,.28);font-family:monospace;margin-top:2px;}
+.inf .nm{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.inf .cd{font-size:11px;color:rgba(255,255,255,.28);font-family:monospace;margin-top:2px;}
 .badge{background:rgba(124,92,252,.15);border:1px solid rgba(124,92,252,.28);border-radius:8px;padding:3px 9px;font-size:12px;color:#c4b5fd;font-weight:600;white-space:nowrap;}
-.badge.red{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3);color:#fca5a5;}
 .qty-ctrl{display:flex;align-items:center;gap:7px;}
-.qb{width:27px;height:27px;background:#1c1c2a;border:1px solid rgba(255,255,255,.09);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:17px;user-select:none;flex-shrink:0;}
+.qb{width:27px;height:27px;background:#1c1c2a;border:1px solid rgba(255,255,255,.09);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:17px;user-select:none;}
 .qb:active{background:#2a2a3c;}
 .qn{font-size:14px;font-weight:600;min-width:18px;text-align:center;}
 .empty{text-align:center;padding:24px 0;color:rgba(255,255,255,.22);font-size:13px;}
 .empty i{font-size:36px;display:block;margin-bottom:8px;opacity:.25;}
 
 /* BOTTOM */
-.bot{padding:12px 16px 20px;border-top:1px solid rgba(255,255,255,.05);flex-shrink:0;background:#0a0a0f;}
+.bot{padding:10px 16px 18px;border-top:1px solid rgba(255,255,255,.05);flex-shrink:0;background:#0a0a0f;}
 .tot-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 .tot-lbl{font-size:12px;color:rgba(255,255,255,.38);}
 .tot-amt{font-size:26px;font-weight:700;letter-spacing:-.5px;}
-.btn-pay{width:100%;background:#7c5cfc;border:none;border-radius:13px;padding:14px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;letter-spacing:.2px;}
-.btn-pay:active{opacity:.85;transform:scale(.98);}
-.btn-pay:disabled{opacity:.35;cursor:default;transform:none;}
+.btn-pay{width:100%;background:#7c5cfc;border:none;border-radius:13px;padding:14px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;}
+.btn-pay:active{opacity:.85;}
+.btn-pay:disabled{opacity:.35;cursor:default;}
 .cbadge{background:#7c5cfc;color:#fff;font-size:10px;font-weight:700;border-radius:999px;padding:1px 6px;margin-left:4px;}
-.btn-clear{background:none;border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:5px 10px;color:rgba(255,255,255,.45);font-size:11px;cursor:pointer;font-family:inherit;margin-left:auto;}
-.btn-clear:active{background:rgba(255,255,255,.05);}
+.btn-clr{background:none;border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:4px 10px;color:rgba(255,255,255,.4);font-size:11px;cursor:pointer;font-family:inherit;margin-left:auto;}
 
 /* TABS */
 .tabs{display:flex;border-top:1px solid rgba(255,255,255,.05);flex-shrink:0;background:#0a0a0f;padding-bottom:env(safe-area-inset-bottom,0);}
@@ -106,14 +106,12 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
 .m-row{display:flex;gap:9px;margin-top:2px;}
 .btn-c{flex:1;background:#1c1c2a;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:13px;color:rgba(255,255,255,.45);font-size:14px;cursor:pointer;font-family:inherit;}
 .btn-s{flex:2;background:#7c5cfc;border:none;border-radius:11px;padding:13px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;}
-.btn-s:active,.btn-c:active{opacity:.8;}
 .btn-del{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:11px;padding:13px;color:#fca5a5;font-size:14px;cursor:pointer;font-family:inherit;margin-top:8px;width:100%;}
-.btn-del:active{opacity:.8;}
 
 /* CHECKOUT */
 .back-hdr{padding:12px 16px;display:flex;align-items:center;gap:11px;flex-shrink:0;}
 .btn-bk{background:#161622;border:none;width:37px;height:37px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;font-size:20px;}
-.co-items{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px;}
+.co-items{flex:1;overflow-y:auto;padding:0 16px;}
 .co-item{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);}
 .co-item:last-child{border-bottom:none;}
 .isub{font-size:15px;font-weight:600;color:#a78bfa;margin-left:auto;white-space:nowrap;}
@@ -122,12 +120,12 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
 .pay-list{padding:0 16px 12px;display:flex;flex-direction:column;gap:9px;}
 .pm{background:#111119;border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:13px;display:flex;align-items:center;gap:11px;cursor:pointer;}
 .pm.sel{border-color:#7c5cfc;background:rgba(124,92,252,.07);}
-.pico{width:42px;height:42px;background:#1c1c2a;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.pico{width:42px;height:42px;background:#1c1c2e;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
 .pnm{font-size:14px;font-weight:500;}
 .pds{font-size:12px;color:rgba(255,255,255,.32);margin-top:1px;}
 .chk{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(255,255,255,.16);margin-left:auto;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .pm.sel .chk{background:#7c5cfc;border-color:#7c5cfc;}
-.qr-box{margin:0 16px 12px;background:#111119;border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:18px;text-align:center;}
+.qr-box{margin:0 16px 12px;background:#111119;border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:16px;text-align:center;}
 #qrc{display:block;margin:0 auto 10px;border-radius:8px;}
 .pp-row{display:flex;gap:7px;margin-top:8px;}
 .pp-row input{flex:1;background:#161622;border:1px solid rgba(255,255,255,.09);border-radius:9px;padding:9px 12px;color:#fff;font-size:14px;outline:none;font-family:inherit;}
@@ -144,8 +142,8 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
 .rr.tot span:last-child{font-size:17px;font-weight:700;color:#a78bfa;}
 .btn-ns{background:#7c5cfc;border:none;border-radius:13px;padding:14px 30px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
 
-/* HISTORY SUMMARY */
-.sumcard{background:linear-gradient(135deg,rgba(124,92,252,.18),rgba(167,139,250,.08));border:1px solid rgba(124,92,252,.25);border-radius:16px;padding:14px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+/* HISTORY */
+.sumcard{background:linear-gradient(135deg,rgba(124,92,252,.18),rgba(167,139,250,.06));border:1px solid rgba(124,92,252,.22);border-radius:16px;padding:14px 16px;margin-bottom:12px;display:flex;justify-content:space-between;}
 .sumcard .lbl{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:3px;}
 .sumcard .val{font-size:20px;font-weight:700;color:#c4b5fd;}
 .sumcard .sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:1px;}
@@ -157,35 +155,40 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
 .set-row input:focus{border-color:#7c5cfc;}
 .btn-sv{background:#7c5cfc;border:none;border-radius:9px;padding:9px 14px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;}
 .saved-lbl{font-size:11px;color:rgba(124,92,252,.8);margin-top:5px;display:none;}
-
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="status-bar">
-    <span id="clock">9:41</span>
-    <span style="display:flex;gap:5px;align-items:center;"><i class="ti ti-wifi" style="font-size:14px"></i><i class="ti ti-battery-2" style="font-size:14px"></i></span>
-  </div>
+  <div class="sb"><span id="clock">9:41</span><span><i class="ti ti-wifi" style="font-size:14px"></i> <i class="ti ti-battery-2" style="font-size:14px"></i></span></div>
 
-  <!-- ═══ SCAN ═══ -->
+  <!-- SCAN -->
   <div class="screen active" id="screen-scan">
-    <div class="header"><h1>สแกนสินค้า</h1><p>สแกนบาร์โค้ด หรือกรอกรหัสสินค้า</p></div>
-    <div class="scanner-wrap" id="sw">
-      <video id="vid" autoplay playsinline muted style="display:none;aspect-ratio:4/3;"></video>
-      <div class="cam-ph" id="cph">
-        <i class="ti ti-camera" style="font-size:38px;opacity:.3;"></i>
-        <span>กล้องยังไม่เปิด</span>
-        <button class="btn-cam" onclick="startCam()"><i class="ti ti-camera"></i> เปิดกล้องสแกน</button>
-      </div>
-      <div class="scanner-overlay" id="sov" style="display:none;">
-        <div class="corner tl"></div><div class="corner tr"></div>
-        <div class="corner bl"></div><div class="corner br"></div>
-        <div class="scan-line"></div>
-        <div class="scan-label" id="sstat">กำลังสแกน...</div>
-      </div>
-      <div class="flash" id="fl"></div>
+    <div class="hdr"><h1>สแกนสินค้า</h1><p>สแกนบาร์โค้ด หรือกรอกรหัสสินค้า</p></div>
+
+    <!-- กล้อง -->
+    <div id="cam-ph" class="cam-ph">
+      <i class="ti ti-camera" style="font-size:38px;opacity:.3;"></i>
+      <span>กดปุ่มด้านล่างเพื่อเปิดกล้อง<br/>และสแกนบาร์โค้ดสินค้า</span>
+      <button class="btn-cam" onclick="startCam()"><i class="ti ti-camera"></i> เปิดกล้องสแกน</button>
     </div>
+    <div id="cam-active" style="display:none;position:relative;">
+      <div class="scan-wrap">
+        <div id="qr-reader"></div>
+        <div class="scan-overlay">
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+          <div class="scan-line"></div>
+          <div class="scan-lbl">วางบาร์โค้ดในกรอบ</div>
+        </div>
+        <div class="flash" id="fl"></div>
+      </div>
+      <div style="text-align:center;padding:6px;">
+        <button onclick="stopCam()" style="background:none;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:5px 14px;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer;">ปิดกล้อง</button>
+      </div>
+    </div>
+    <div class="scan-status" id="sstat"></div>
+
     <div class="or-div"><span>หรือกรอกรหัสสินค้า</span></div>
     <div class="row-inp">
       <input type="tel" id="binp" placeholder="บาร์โค้ด เช่น 8850006104308" autocomplete="off"/>
@@ -194,15 +197,12 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
     <div class="list-wrap">
       <div class="sec-lbl" style="justify-content:space-between;">
         <span>ตะกร้า <span class="cbadge" id="ccnt">0</span></span>
-        <button class="btn-clear" id="btn-clr" onclick="clearCart()" style="display:none;">ล้างตะกร้า</button>
+        <button class="btn-clr" id="btnclr" onclick="clearCart()" style="display:none;">ล้างตะกร้า</button>
       </div>
       <div id="clist"></div>
     </div>
     <div class="bot">
-      <div class="tot-row">
-        <span class="tot-lbl">ยอดรวม</span>
-        <span class="tot-amt">฿<span id="totdisp">0</span></span>
-      </div>
+      <div class="tot-row"><span class="tot-lbl">ยอดรวม</span><span class="tot-amt">฿<span id="totdisp">0</span></span></div>
       <button class="btn-pay" id="btnpay" onclick="goCheckout()" disabled><i class="ti ti-credit-card"></i> ชำระเงิน</button>
     </div>
     <div class="tabs">
@@ -212,22 +212,17 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
     </div>
   </div>
 
-  <!-- ═══ PRODUCTS ═══ -->
+  <!-- PRODUCTS -->
   <div class="screen" id="screen-products">
-    <div class="header"><h1>จัดการสินค้า</h1><p>แตะสินค้าเพื่อแก้ไขราคาหรือลบ</p></div>
+    <div class="hdr"><h1>จัดการสินค้า</h1><p>แตะสินค้าเพื่อแก้ไขราคาหรือลบ</p></div>
     <div class="list-wrap">
       <div class="sec-lbl">ตั้งค่าพร้อมเพย์</div>
       <div class="set-card">
         <div style="font-size:11px;color:rgba(255,255,255,.38);margin-bottom:7px;">เบอร์มือถือ / เลขบัตรประชาชน 13 หลัก</div>
-        <div class="set-row">
-          <input type="tel" id="ppset" placeholder="0812345678"/>
-          <button class="btn-sv" onclick="savePP()">บันทึก</button>
-        </div>
+        <div class="set-row"><input type="tel" id="ppset" placeholder="0812345678"/><button class="btn-sv" onclick="savePP()">บันทึก</button></div>
         <div class="saved-lbl" id="ppsaved"></div>
       </div>
-      <div class="sec-lbl" style="justify-content:space-between;margin-top:4px;">
-        <span>สินค้าทั้งหมด <span id="pcnt" style="opacity:.5;font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></span>
-      </div>
+      <div class="sec-lbl" style="margin-top:4px;">สินค้าทั้งหมด <span id="pcnt" style="opacity:.5;font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></div>
       <div id="plist"></div>
     </div>
     <div class="tabs">
@@ -237,9 +232,9 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
     </div>
   </div>
 
-  <!-- ═══ HISTORY ═══ -->
+  <!-- HISTORY -->
   <div class="screen" id="screen-history">
-    <div class="header"><h1>ยอดขาย</h1><p>สรุปและประวัติการขาย</p></div>
+    <div class="hdr"><h1>ยอดขาย</h1><p>สรุปและประวัติการขาย</p></div>
     <div class="list-wrap" id="hlist"></div>
     <div class="tabs">
       <button class="tab" onclick="showTab('scan')"><i class="ti ti-scan"></i>สแกน</button>
@@ -248,7 +243,7 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
     </div>
   </div>
 
-  <!-- ═══ CHECKOUT ═══ -->
+  <!-- CHECKOUT -->
   <div class="screen" id="screen-checkout">
     <div class="back-hdr">
       <button class="btn-bk" onclick="showScreen('scan')"><i class="ti ti-arrow-left"></i></button>
@@ -261,7 +256,7 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
     </div>
   </div>
 
-  <!-- ═══ PAYMENT ═══ -->
+  <!-- PAYMENT -->
   <div class="screen" id="screen-payment">
     <div class="back-hdr">
       <button class="btn-bk" onclick="showScreen('checkout')"><i class="ti ti-arrow-left"></i></button>
@@ -271,23 +266,11 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
       <div style="font-size:32px;font-weight:700;letter-spacing:-1px;">฿<span id="paytot">0</span></div>
       <div style="font-size:11px;color:rgba(255,255,255,.32);margin-top:2px;">ยอดที่ต้องชำระ</div>
     </div>
-    <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+    <div style="flex:1;overflow-y:auto;">
       <div class="pay-list">
-        <div class="pm sel" id="pm-qr" onclick="selPay(this,'qr')">
-          <div class="pico">💸</div>
-          <div><div class="pnm">QR พร้อมเพย์</div><div class="pds">สแกน QR เพื่อโอนเงิน</div></div>
-          <div class="chk"><i class="ti ti-check" style="font-size:11px;"></i></div>
-        </div>
-        <div class="pm" id="pm-cash" onclick="selPay(this,'cash')">
-          <div class="pico">💵</div>
-          <div><div class="pnm">เงินสด</div><div class="pds">รับเงินสดและทอนเงิน</div></div>
-          <div class="chk"></div>
-        </div>
-        <div class="pm" id="pm-card" onclick="selPay(this,'card')">
-          <div class="pico">💳</div>
-          <div><div class="pnm">บัตรเครดิต / เดบิต</div><div class="pds">Visa, Mastercard, Thai QR</div></div>
-          <div class="chk"></div>
-        </div>
+        <div class="pm sel" onclick="selPay(this,'qr')"><div class="pico">💸</div><div><div class="pnm">QR พร้อมเพย์</div><div class="pds">สแกน QR เพื่อโอนเงิน</div></div><div class="chk"><i class="ti ti-check" style="font-size:11px;"></i></div></div>
+        <div class="pm" onclick="selPay(this,'cash')"><div class="pico">💵</div><div><div class="pnm">เงินสด</div><div class="pds">รับเงินสดและทอนเงิน</div></div><div class="chk"></div></div>
+        <div class="pm" onclick="selPay(this,'card')"><div class="pico">💳</div><div><div class="pnm">บัตรเครดิต / เดบิต</div><div class="pds">Visa, Mastercard</div></div><div class="chk"></div></div>
       </div>
       <div class="qr-box" id="qrbox">
         <div style="font-size:11px;color:rgba(255,255,255,.32);margin-bottom:10px;">QR พร้อมเพย์ของคุณ</div>
@@ -305,7 +288,7 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
     </div>
   </div>
 
-  <!-- ═══ SUCCESS ═══ -->
+  <!-- SUCCESS -->
   <div class="suc" id="screen-success">
     <div class="sic"><i class="ti ti-check"></i></div>
     <div style="font-size:22px;font-weight:700;margin-bottom:5px;">ชำระเงินสำเร็จ!</div>
@@ -314,11 +297,11 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
     <button class="btn-ns" onclick="newSale()">+ ขายรายการใหม่</button>
   </div>
 
-  <!-- ═══ MODAL: EDIT PRICE ═══ -->
+  <!-- MODAL EDIT -->
   <div class="overlay" id="medit">
     <div class="sheet">
       <div class="handle"></div>
-      <div class="m-title" id="mn"></div>
+      <div class="m-title" id="mn">แก้ไขสินค้า</div>
       <div class="m-sub" id="mc"></div>
       <div class="m-lbl">ชื่อสินค้า</div>
       <input type="text" class="m-inp sm" id="mename" placeholder="ชื่อสินค้า"/>
@@ -328,11 +311,11 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
         <button class="btn-c" onclick="closeM('medit')">ยกเลิก</button>
         <button class="btn-s" onclick="saveEdit()">บันทึก</button>
       </div>
-      <button class="btn-del" onclick="deleteProduct()"><i class="ti ti-trash"></i> ลบสินค้านี้</button>
+      <button class="btn-del" onclick="delProd()"><i class="ti ti-trash"></i> ลบสินค้านี้</button>
     </div>
   </div>
 
-  <!-- ═══ MODAL: ADD PRODUCT ═══ -->
+  <!-- MODAL ADD -->
   <div class="overlay" id="madd">
     <div class="sheet">
       <div class="handle"></div>
@@ -353,165 +336,148 @@ html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSyste
 </div>
 
 <script>
-// ─── DATA ───
-let products = JSON.parse(localStorage.getItem('prods') || 'null') || {
-  '8850006104308': { name: 'มาม่าต้มยำกุ้ง', price: 6, icon: '🍜' },
-  '8851932101012': { name: 'น้ำดื่มมิเนเร่ 1.5L', price: 12, icon: '💧' },
-  '8850260010101': { name: 'ข้าวสวยถุง', price: 35, icon: '🍚' },
-  '8851234567890': { name: 'ขนมปังแผ่น', price: 28, icon: '🍞' },
-  '8850006108030': { name: 'เป๊ปซี่ 325ml', price: 15, icon: '🥤' },
+// DATA
+let products = JSON.parse(localStorage.getItem('prods')||'null') || {
+  '8850006104308':{name:'มาม่าต้มยำกุ้ง',price:6,icon:'🍜'},
+  '8851932101012':{name:'น้ำดื่มมิเนเร่ 1.5L',price:12,icon:'💧'},
+  '8850260010101':{name:'ข้าวสวยถุง',price:35,icon:'🍚'},
+  '8851234567890':{name:'ขนมปังแผ่น',price:28,icon:'🍞'},
+  '8850006108030':{name:'เป๊ปซี่ 325ml',price:15,icon:'🥤'},
 };
-let cart = {};
-let history = JSON.parse(localStorage.getItem('hist') || '[]');
-let ppNum = localStorage.getItem('pp') || '';
-let payMethod = 'qr';
-let editCode = null;
-let pendCode = null;
-let reader = null;
-let lastCode = ''; let lastTime = 0;
+let cart={}, history=JSON.parse(localStorage.getItem('hist')||'[]');
+let ppNum=localStorage.getItem('pp')||'', payMethod='qr';
+let editCode=null, pendCode=null, html5Cam=null;
+let lastCode='', lastTime=0;
 
-function persist() {
-  localStorage.setItem('prods', JSON.stringify(products));
-  localStorage.setItem('hist', JSON.stringify(history));
+function persist(){
+  localStorage.setItem('prods',JSON.stringify(products));
+  localStorage.setItem('hist',JSON.stringify(history));
 }
 
-// ─── CLOCK ───
-function tick() {
-  const n = new Date();
-  document.getElementById('clock').textContent =
-    n.getHours().toString().padStart(2,'0') + ':' + n.getMinutes().toString().padStart(2,'0');
+// CLOCK
+function tick(){
+  const n=new Date();
+  document.getElementById('clock').textContent=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
 }
-tick(); setInterval(tick, 15000);
+tick(); setInterval(tick,15000);
 
-// ─── AUDIO BEEP ───
-function beep() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator(); const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.frequency.value = 1200; g.gain.setValueAtTime(0.3, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-    o.start(); o.stop(ctx.currentTime + 0.12);
-  } catch(e){}
+// BEEP
+function beep(){
+  try{
+    const c=new(window.AudioContext||window.webkitAudioContext)();
+    const o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.frequency.value=1200;g.gain.setValueAtTime(0.3,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.12);
+    o.start();o.stop(c.currentTime+0.12);
+  }catch(e){}
 }
 
-// ─── SCREEN / TAB ───
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+// SCREEN
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-success').classList.remove('active');
-  const el = document.getElementById('screen-' + id);
-  if (el) el.classList.add('active');
-  if (id !== 'scan') stopCam();
+  document.getElementById('screen-'+id).classList.add('active');
+  if(id!=='scan') stopCam();
 }
-function showTab(t) {
+function showTab(t){
   showScreen(t);
-  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-  const i = {scan:0,products:1,history:2}[t];
-  document.querySelectorAll('.tab')[i].classList.add('active');
-  if (t === 'products') renderProds();
-  if (t === 'history') renderHist();
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab')[{scan:0,products:1,history:2}[t]].classList.add('active');
+  if(t==='products') renderProds();
+  if(t==='history') renderHist();
 }
 
-// ─── CAMERA ───
-async function startCam() {
-  const cph = document.getElementById('cph');
-  cph.innerHTML = '<i class="ti ti-loader" style="font-size:32px;opacity:.4;animation:spin 1s linear infinite;"></i><span style="color:rgba(255,255,255,.35);font-size:12px;">กำลังเปิดกล้อง...</span>';
-  try {
-    if (typeof ZXing === 'undefined') throw new Error('โหลดไลบรารีไม่สำเร็จ กรุณารีเฟรช');
-    reader = new ZXing.BrowserMultiFormatReader();
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode:'environment', width:{ideal:1280}, height:{ideal:720} }
-    });
-    const vid = document.getElementById('vid');
-    vid.srcObject = stream; vid.style.display = 'block';
-    cph.style.display = 'none';
-    document.getElementById('sov').style.display = 'block';
-    document.getElementById('sstat').textContent = 'กำลังสแกน...';
-    reader.decodeFromStream(stream, vid, (res, err) => {
-      if (!res) return;
-      const code = res.getText();
-      const now = Date.now();
-      if (code === lastCode && now - lastTime < 2500) return;
-      lastCode = code; lastTime = now;
-      document.getElementById('sstat').textContent = '✓ ' + code;
+// CAMERA — ใช้ html5-qrcode
+function startCam(){
+  document.getElementById('cam-ph').style.display='none';
+  document.getElementById('cam-active').style.display='block';
+  document.getElementById('sstat').textContent='กำลังเปิดกล้อง...';
+
+  html5Cam = new Html5Qrcode("qr-reader");
+  html5Cam.start(
+    {facingMode:"environment"},
+    {fps:10, qrbox:{width:220,height:160}, aspectRatio:1.333},
+    (decodedText)=>{
+      const now=Date.now();
+      if(decodedText===lastCode && now-lastTime<2500) return;
+      lastCode=decodedText; lastTime=now;
+      document.getElementById('sstat').textContent='✓ สแกนได้: '+decodedText;
       flashScan(); beep();
-      handleCode(code);
-    });
-  } catch(e) {
-    cph.style.display = 'flex';
-    cph.innerHTML = `<i class="ti ti-camera-off" style="font-size:34px;opacity:.35;"></i>
-      <span style="color:rgba(255,100,100,.8);font-size:11px;text-align:center;padding:0 18px;">${e.message||'ไม่สามารถเปิดกล้องได้'}</span>
-      <button class="btn-cam" onclick="startCam()"><i class="ti ti-refresh"></i> ลองใหม่</button>`;
-  }
-}
-function stopCam() {
-  if (reader) { try{reader.reset();}catch(e){} reader = null; }
-  const v = document.getElementById('vid');
-  if (v.srcObject) { v.srcObject.getTracks().forEach(t=>t.stop()); v.srcObject = null; }
-  v.style.display = 'none';
-  document.getElementById('sov').style.display = 'none';
-  const cph = document.getElementById('cph');
-  cph.style.display = 'flex';
-  cph.innerHTML = '<i class="ti ti-camera" style="font-size:38px;opacity:.3;"></i><span>กล้องยังไม่เปิด</span><button class="btn-cam" onclick="startCam()"><i class="ti ti-camera"></i> เปิดกล้องสแกน</button>';
-}
-function flashScan() {
-  const f = document.getElementById('fl');
-  f.classList.add('on'); setTimeout(()=>f.classList.remove('on'), 250);
+      handleCode(decodedText);
+    },
+    ()=>{}
+  ).catch(err=>{
+    document.getElementById('sstat').textContent='❌ เปิดกล้องไม่ได้: '+err;
+    document.getElementById('cam-ph').style.display='flex';
+    document.getElementById('cam-active').style.display='none';
+  });
 }
 
-// ─── SCAN ───
-function handleCode(code) {
-  if (products[code]) { addToCart(code); }
-  else {
-    pendCode = code;
-    document.getElementById('macode').textContent = 'บาร์โค้ด: ' + code;
-    document.getElementById('maname').value = '';
-    document.getElementById('maprice').value = '';
-    document.getElementById('maicon').value = '';
+function stopCam(){
+  if(html5Cam){
+    html5Cam.stop().catch(()=>{});
+    html5Cam=null;
+  }
+  document.getElementById('cam-ph').style.display='flex';
+  document.getElementById('cam-active').style.display='none';
+  document.getElementById('sstat').textContent='';
+}
+
+function flashScan(){
+  const f=document.getElementById('fl');
+  f.classList.add('on'); setTimeout(()=>f.classList.remove('on'),250);
+}
+
+// SCAN
+function handleCode(code){
+  if(products[code]){addToCart(code);}
+  else{
+    pendCode=code;
+    document.getElementById('macode').textContent='บาร์โค้ด: '+code;
+    document.getElementById('maname').value='';
+    document.getElementById('maprice').value='';
+    document.getElementById('maicon').value='';
     document.getElementById('madd').classList.add('open');
   }
 }
-function doScan() {
-  const inp = document.getElementById('binp');
-  const code = inp.value.trim();
-  if (!code) { inp.style.borderColor='#ef4444'; setTimeout(()=>inp.style.borderColor='',600); return; }
-  handleCode(code); inp.value = '';
+function doScan(){
+  const inp=document.getElementById('binp');
+  const code=inp.value.trim();
+  if(!code){inp.style.borderColor='#ef4444';setTimeout(()=>inp.style.borderColor='',600);return;}
+  handleCode(code); inp.value='';
 }
-document.getElementById('binp').addEventListener('keydown', e => { if(e.key==='Enter') doScan(); });
+document.getElementById('binp').addEventListener('keydown',e=>{if(e.key==='Enter')doScan();});
 
-// ─── CART ───
-function addToCart(code) {
-  cart[code] = cart[code] ? {qty: cart[code].qty+1} : {qty:1};
+// CART
+function addToCart(code){
+  cart[code]=cart[code]?{qty:cart[code].qty+1}:{qty:1};
   renderCart();
 }
-function remCart(code) {
-  if (!cart[code]) return;
-  cart[code].qty > 1 ? cart[code].qty-- : delete cart[code];
+function remCart(code){
+  if(!cart[code])return;
+  cart[code].qty>1?cart[code].qty--:delete cart[code];
   renderCart();
 }
-function clearCart() {
-  cart = {}; renderCart();
-}
-function total() {
-  return Object.entries(cart).reduce((s,[c,v]) => s + (products[c] ? products[c].price * v.qty : 0), 0);
-}
-function fmt(n) { return n.toLocaleString('th-TH',{minimumFractionDigits:0,maximumFractionDigits:2}); }
+function clearCart(){cart={};renderCart();}
+function total(){return Object.entries(cart).reduce((s,[c,v])=>s+(products[c]?products[c].price*v.qty:0),0);}
+function fmt(n){return n.toLocaleString('th-TH',{minimumFractionDigits:0,maximumFractionDigits:2});}
 
-function renderCart() {
-  const cnt = Object.values(cart).reduce((s,v)=>s+v.qty, 0);
-  document.getElementById('ccnt').textContent = cnt;
-  document.getElementById('totdisp').textContent = fmt(total());
-  document.getElementById('btnpay').disabled = cnt === 0;
-  document.getElementById('btn-clr').style.display = cnt ? 'block' : 'none';
-  const el = document.getElementById('clist');
-  if (!cnt) { el.innerHTML = '<div class="empty"><i class="ti ti-shopping-cart-off"></i>ยังไม่มีสินค้าในตะกร้า</div>'; return; }
-  el.innerHTML = Object.entries(cart).map(([code,item]) => {
-    const p = products[code]; if(!p) return '';
-    return `<div class="card">
-      <div class="icon-box">${p.icon}</div>
-      <div class="inf"><div class="name">${p.name}</div><div class="code">${code}</div></div>
+function renderCart(){
+  const cnt=Object.values(cart).reduce((s,v)=>s+v.qty,0);
+  document.getElementById('ccnt').textContent=cnt;
+  document.getElementById('totdisp').textContent=fmt(total());
+  document.getElementById('btnpay').disabled=cnt===0;
+  document.getElementById('btnclr').style.display=cnt?'block':'none';
+  const el=document.getElementById('clist');
+  if(!cnt){el.innerHTML='<div class="empty"><i class="ti ti-shopping-cart-off"></i>ยังไม่มีสินค้าในตะกร้า</div>';return;}
+  el.innerHTML=Object.entries(cart).map(([code,item])=>{
+    const p=products[code];if(!p)return'';
+    return`<div class="card">
+      <div class="ico">${p.icon}</div>
+      <div class="inf"><div class="nm">${p.name}</div><div class="cd">${code}</div></div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-        <div class="badge">฿${fmt(p.price * item.qty)}</div>
+        <div class="badge">฿${fmt(p.price*item.qty)}</div>
         <div class="qty-ctrl">
           <div class="qb" onclick="remCart('${code}')">−</div>
           <div class="qn">${item.qty}</div>
@@ -522,98 +488,90 @@ function renderCart() {
   }).join('');
 }
 
-// ─── PRODUCTS ───
-function renderProds() {
-  document.getElementById('pcnt').textContent = Object.keys(products).length + ' รายการ';
-  document.getElementById('ppset').value = ppNum;
-  if (ppNum) { document.getElementById('ppsaved').style.display='block'; document.getElementById('ppsaved').textContent='✓ '+ppNum; }
-  document.getElementById('plist').innerHTML = Object.entries(products).map(([code,p]) => `
+// PRODUCTS
+function renderProds(){
+  document.getElementById('pcnt').textContent=Object.keys(products).length+' รายการ';
+  document.getElementById('ppset').value=ppNum;
+  if(ppNum){document.getElementById('ppsaved').style.display='block';document.getElementById('ppsaved').textContent='✓ '+ppNum;}
+  document.getElementById('plist').innerHTML=Object.entries(products).map(([code,p])=>`
     <div class="card" onclick="openEdit('${code}')">
-      <div class="icon-box">${p.icon}</div>
-      <div class="inf"><div class="name">${p.name}</div><div class="code">${code}</div></div>
+      <div class="ico">${p.icon}</div>
+      <div class="inf"><div class="nm">${p.name}</div><div class="cd">${code}</div></div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
         <div class="badge">฿${fmt(p.price)}</div>
         <div style="font-size:10px;color:rgba(255,255,255,.22);">แตะแก้ไข</div>
       </div>
     </div>`).join('');
 }
-function savePP() {
-  const v = document.getElementById('ppset').value.trim();
-  if (!v) return;
-  ppNum = v; localStorage.setItem('pp', v);
-  document.getElementById('ppsaved').style.display = 'block';
-  document.getElementById('ppsaved').textContent = '✓ บันทึกแล้ว: ' + v;
+function savePP(){
+  const v=document.getElementById('ppset').value.trim();
+  if(!v)return;
+  ppNum=v;localStorage.setItem('pp',v);
+  document.getElementById('ppsaved').style.display='block';
+  document.getElementById('ppsaved').textContent='✓ บันทึกแล้ว: '+v;
 }
 
-// ─── HISTORY ───
-function renderHist() {
-  const today = new Date().toLocaleDateString('th-TH');
-  const todaySales = history.filter(s => s.time.startsWith(today));
-  const todayTotal = todaySales.reduce((s,v)=>s+v.total, 0);
-  const el = document.getElementById('hlist');
-  let html = `<div class="sumcard">
-    <div><div class="lbl">ยอดขายวันนี้</div><div class="val">฿${fmt(todayTotal)}</div><div class="sub">${todaySales.length} ออเดอร์</div></div>
+// HISTORY
+function renderHist(){
+  const today=new Date().toLocaleDateString('th-TH');
+  const ts=history.filter(s=>s.time.startsWith(today));
+  const el=document.getElementById('hlist');
+  let html=`<div class="sumcard">
+    <div><div class="lbl">ยอดขายวันนี้</div><div class="val">฿${fmt(ts.reduce((s,v)=>s+v.total,0))}</div><div class="sub">${ts.length} ออเดอร์</div></div>
     <div style="text-align:right;"><div class="lbl">ยอดรวมทั้งหมด</div><div class="val" style="font-size:16px;">฿${fmt(history.reduce((s,v)=>s+v.total,0))}</div><div class="sub">${history.length} ออเดอร์</div></div>
   </div>`;
-  if (!history.length) {
-    html += '<div class="empty"><i class="ti ti-receipt-off"></i>ยังไม่มีประวัติการขาย</div>';
-  } else {
-    html += '<div class="sec-lbl">ออเดอร์ล่าสุด</div>' + history.map((s,i) => `
-      <div class="card" style="flex-direction:column;align-items:flex-start;gap:5px;">
-        <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
-          <span style="font-size:13px;font-weight:600;">ออเดอร์ #${history.length-i}</span>
-          <span class="badge">฿${fmt(s.total)}</span>
-        </div>
-        <div style="font-size:10px;color:rgba(255,255,255,.3);">${s.time} · ${s.method}</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.4);">${s.items.map(it=>it.icon+' '+it.name+' ×'+it.qty).join(' · ')}</div>
-      </div>`).join('');
-  }
-  el.innerHTML = html;
+  if(!history.length){html+='<div class="empty"><i class="ti ti-receipt-off"></i>ยังไม่มีประวัติการขาย</div>';}
+  else{html+='<div class="sec-lbl">ออเดอร์ล่าสุด</div>'+history.map((s,i)=>`
+    <div class="card" style="flex-direction:column;align-items:flex-start;gap:5px;">
+      <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+        <span style="font-size:13px;font-weight:600;">ออเดอร์ #${history.length-i}</span>
+        <span class="badge">฿${fmt(s.total)}</span>
+      </div>
+      <div style="font-size:10px;color:rgba(255,255,255,.3);">${s.time} · ${s.method}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.4);">${s.items.map(it=>it.icon+' '+it.name+' ×'+it.qty).join(' · ')}</div>
+    </div>`).join('');}
+  el.innerHTML=html;
 }
 
-// ─── MODALS ───
-function openEdit(code) {
-  editCode = code; const p = products[code];
-  document.getElementById('mn').textContent = 'แก้ไขสินค้า';
-  document.getElementById('mc').textContent = 'บาร์โค้ด: ' + code;
-  document.getElementById('mename').value = p.name;
-  document.getElementById('meprice').value = p.price;
+// MODALS
+function openEdit(code){
+  editCode=code;const p=products[code];
+  document.getElementById('mn').textContent='แก้ไขสินค้า';
+  document.getElementById('mc').textContent='บาร์โค้ด: '+code;
+  document.getElementById('mename').value=p.name;
+  document.getElementById('meprice').value=p.price;
   document.getElementById('medit').classList.add('open');
 }
-function closeM(id) { document.getElementById(id).classList.remove('open'); }
-function saveEdit() {
-  const name = document.getElementById('mename').value.trim();
-  const price = parseFloat(document.getElementById('meprice').value);
-  if (!name || isNaN(price) || price < 0) return;
-  products[editCode].name = name;
-  products[editCode].price = price;
-  persist(); closeM('medit'); renderProds(); renderCart();
+function closeM(id){document.getElementById(id).classList.remove('open');}
+function saveEdit(){
+  const name=document.getElementById('mename').value.trim();
+  const price=parseFloat(document.getElementById('meprice').value);
+  if(!name||isNaN(price)||price<0)return;
+  products[editCode].name=name; products[editCode].price=price;
+  persist();closeM('medit');renderProds();renderCart();
 }
-function deleteProduct() {
-  if (!confirm('ลบ "' + products[editCode].name + '" ออกจากคลังสินค้า?')) return;
-  delete products[editCode];
-  if (cart[editCode]) delete cart[editCode];
-  persist(); closeM('medit'); renderProds(); renderCart();
+function delProd(){
+  if(!confirm('ลบ "'+products[editCode].name+'" ออกจากคลัง?'))return;
+  delete products[editCode]; if(cart[editCode])delete cart[editCode];
+  persist();closeM('medit');renderProds();renderCart();
 }
-function saveAdd() {
-  const name = document.getElementById('maname').value.trim();
-  const price = parseFloat(document.getElementById('maprice').value);
-  const icon = document.getElementById('maicon').value.trim() || '📦';
-  if (!name || isNaN(price) || price < 0) return;
-  products[pendCode] = { name, price, icon };
-  persist(); closeM('madd');
-  addToCart(pendCode);
-  document.getElementById('binp').value = '';
-  pendCode = null;
+function saveAdd(){
+  const name=document.getElementById('maname').value.trim();
+  const price=parseFloat(document.getElementById('maprice').value);
+  const icon=document.getElementById('maicon').value.trim()||'📦';
+  if(!name||isNaN(price)||price<0)return;
+  products[pendCode]={name,price,icon};
+  persist();closeM('madd');addToCart(pendCode);
+  document.getElementById('binp').value=''; pendCode=null;
 }
 
-// ─── CHECKOUT ───
-function goCheckout() {
-  document.getElementById('cotot').textContent = fmt(total());
-  document.getElementById('coitems').innerHTML = Object.entries(cart).map(([code,item]) => {
-    const p = products[code];
-    return `<div class="co-item">
-      <div class="icon-box" style="width:36px;height:36px;font-size:18px;">${p.icon}</div>
+// CHECKOUT
+function goCheckout(){
+  document.getElementById('cotot').textContent=fmt(total());
+  document.getElementById('coitems').innerHTML=Object.entries(cart).map(([code,item])=>{
+    const p=products[code];
+    return`<div class="co-item">
+      <div class="ico" style="width:36px;height:36px;font-size:18px;">${p.icon}</div>
       <div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;">${p.name}</div>
       <div style="font-size:11px;color:rgba(255,255,255,.3);">฿${fmt(p.price)} × ${item.qty}</div></div>
       <div class="isub">฿${fmt(p.price*item.qty)}</div>
@@ -622,113 +580,65 @@ function goCheckout() {
   showScreen('checkout');
 }
 
-// ─── PAYMENT ───
-function goPayment() {
-  const t = total();
-  document.getElementById('paytot').textContent = fmt(t);
+// PAYMENT
+function goPayment(){
+  const t=total();
+  document.getElementById('paytot').textContent=fmt(t);
   showScreen('payment');
-  const pp = ppNum || localStorage.getItem('pp') || '';
-  if (pp) { document.getElementById('ppinl').value = pp; generateQR(pp, t); }
-  else { const ctx = document.getElementById('qrc').getContext('2d'); ctx.clearRect(0,0,180,180); document.getElementById('qrlbl').textContent='ใส่เบอร์พร้อมเพย์ด้านล่าง'; }
+  const pp=ppNum||'';
+  if(pp){document.getElementById('ppinl').value=pp;generateQR(pp,t);}
+  else{const ctx=document.getElementById('qrc').getContext('2d');ctx.clearRect(0,0,180,180);document.getElementById('qrlbl').textContent='ใส่เบอร์พร้อมเพย์ด้านล่าง';}
 }
-function selPay(el, method) {
+function selPay(el,method){
   document.querySelectorAll('.pm').forEach(m=>m.classList.remove('sel'));
-  el.classList.add('sel'); payMethod = method;
-  document.getElementById('qrbox').style.display = method==='qr' ? 'block' : 'none';
+  el.classList.add('sel'); payMethod=method;
+  document.getElementById('qrbox').style.display=method==='qr'?'block':'none';
 }
-function genQRInline() {
-  const n = document.getElementById('ppinl').value.trim();
-  if (!n) return;
-  ppNum = n; localStorage.setItem('pp', n);
-  generateQR(n, total());
+function genQRInline(){
+  const n=document.getElementById('ppinl').value.trim();
+  if(!n)return;
+  ppNum=n;localStorage.setItem('pp',n);
+  generateQR(n,total());
 }
 
-// ─── PROMPTPAY QR (EMVCo / BOT standard) ───
-function generateQR(number, amount) {
-  const digits = number.replace(/\D/g,'');
-  let target;
-  // national ID = 13 digits, phone = 10 digits (starts 0) → convert to 0066XXXXXXXXX
-  if (digits.length === 13) {
-    target = digits; // citizen ID, used as-is
-  } else if (digits.length === 10 && digits.startsWith('0')) {
-    target = '0066' + digits.substring(1); // e.g. 0812345678 → 0066812345678
-  } else {
-    target = digits;
-  }
-
-  function tlv(tag, value) {
-    const len = value.length.toString().padStart(2,'0');
-    return tag + len + value;
-  }
-
-  const guid = tlv('00','A000000677010111');
-  const mobileTag = tlv('01', target);
-  const merchantAccount = tlv('29', guid + mobileTag);
-
-  let amountField = '';
-  if (amount > 0) {
-    amountField = tlv('54', amount.toFixed(2));
-  }
-
-  const payload = '000201'             // Payload Format Indicator
-    + '010212'                          // Point of Initiation: dynamic
-    + merchantAccount                   // Merchant Account Info
-    + '5303764'                         // Currency: THB
-    + amountField
-    + '5802TH'                         // Country: TH
-    + '6304';                           // CRC placeholder
-
-  const crc = crc16ccitt(payload);
-  const final = payload + crc;
-
-  QRCode.toCanvas(document.getElementById('qrc'), final, {
-    width: 180, margin: 1, color: {dark:'#000000', light:'#ffffff'}
-  }, err => {
-    if (err) {
-      // fallback
-      QRCode.toCanvas(document.getElementById('qrc'), 'PromptPay:'+number+':'+amount.toFixed(2), {width:180,margin:1});
-    }
+// PROMPTPAY QR
+function generateQR(number,amount){
+  const digits=number.replace(/\D/g,'');
+  let target=digits.length===10&&digits.startsWith('0')?'0066'+digits.substring(1):digits;
+  function tlv(tag,val){return tag+val.length.toString().padStart(2,'0')+val;}
+  const ma=tlv('29',tlv('00','A000000677010111')+tlv('01',target));
+  const amt=amount>0?tlv('54',amount.toFixed(2)):'';
+  const payload='000201010212'+ma+'5303764'+amt+'5802TH6304';
+  let crc=0xFFFF;
+  for(let i=0;i<payload.length;i++){crc^=payload.charCodeAt(i)<<8;for(let j=0;j<8;j++)crc=(crc&0x8000)?((crc<<1)^0x1021):(crc<<1);}
+  const final=payload+(crc&0xFFFF).toString(16).toUpperCase().padStart(4,'0');
+  QRCode.toCanvas(document.getElementById('qrc'),final,{width:180,margin:1,color:{dark:'#000',light:'#fff'}},err=>{
+    if(err)QRCode.toCanvas(document.getElementById('qrc'),'PromptPay:'+number+':'+amount.toFixed(2),{width:180,margin:1});
   });
-  document.getElementById('qrlbl').textContent = '📱 ' + number + '  ฿' + fmt(amount);
+  document.getElementById('qrlbl').textContent='📱 '+number+'  ฿'+fmt(amount);
 }
 
-function crc16ccitt(str) {
-  let crc = 0xFFFF;
-  for (let i = 0; i < str.length; i++) {
-    crc ^= (str.charCodeAt(i) << 8);
-    for (let j = 0; j < 8; j++) {
-      crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) : (crc << 1);
-    }
-  }
-  return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4,'0');
-}
-
-// ─── CONFIRM ───
-function confirmPay() {
-  const t = total();
-  const items = Object.entries(cart).map(([code,item]) => ({
-    ...products[code], qty: item.qty, subtotal: products[code].price * item.qty
-  }));
-  const mn = {qr:'QR พร้อมเพย์', cash:'เงินสด', card:'บัตรเครดิต'}[payMethod];
-  const now = new Date();
-  const ts = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
-  history.unshift({items, total:t, method:mn, time:ts});
-  persist();
-  document.getElementById('srec').innerHTML =
-    items.map(i=>`<div class="rr"><span>${i.icon} ${i.name} ×${i.qty}</span><span>฿${fmt(i.subtotal)}</span></div>`).join('') +
-    `<div class="rr tot"><span>ยอดรวม</span><span>฿${fmt(t)}</span></div>` +
+function confirmPay(){
+  const t=total();
+  const items=Object.entries(cart).map(([code,item])=>({...products[code],qty:item.qty,subtotal:products[code].price*item.qty}));
+  const mn={qr:'QR พร้อมเพย์',cash:'เงินสด',card:'บัตรเครดิต'}[payMethod];
+  const now=new Date();
+  const ts=now.toLocaleDateString('th-TH')+' '+now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  history.unshift({items,total:t,method:mn,time:ts}); persist();
+  document.getElementById('srec').innerHTML=
+    items.map(i=>`<div class="rr"><span>${i.icon} ${i.name} ×${i.qty}</span><span>฿${fmt(i.subtotal)}</span></div>`).join('')+
+    `<div class="rr tot"><span>ยอดรวม</span><span>฿${fmt(t)}</span></div>`+
     `<div style="font-size:10px;color:rgba(255,255,255,.22);margin-top:8px;">${ts} · ${mn}</div>`;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-success').classList.add('active');
-  cart = {};
+  cart={};
 }
 
-function newSale() {
+function newSale(){
   document.getElementById('screen-success').classList.remove('active');
   renderCart(); showTab('scan');
 }
 
-// ─── INIT ───
 renderCart();
 </script>
 </body>
